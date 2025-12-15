@@ -223,6 +223,10 @@ subscribeForecastEvents() {
     if (this.forecastSubscriber) {
       this.forecastSubscriber.then((unsub) => unsub());
     }
+	if (this._clockIntervalId) {
+	  clearInterval(this._clockIntervalId);
+	  this._clockIntervalId = null;
+	}
   }
 
   attachResizeObserver() {
@@ -440,7 +444,7 @@ autoscroll() {
     this.autoscrollTimeout = setTimeout(() => {
       this.autoscrollTimeout = null;
       this.updateChart();
-      drawChartOncePerHour();
+      updateChartOncePerHour();
     }, nextHour - now);
   };
 
@@ -1039,10 +1043,11 @@ renderMain({ config, sun, weather, temperature, feels_like, description } = this
     }
   };
 
-  updateClock();
-
   if (showTime) {
-    setInterval(updateClock, 1000);
+    if (!this._clockIntervalId) {
+      const intervalMs = showSeconds ? 1000 : 60000;
+      this._clockIntervalId = setInterval(updateClock, intervalMs);
+    }
   }
 
   return html`
